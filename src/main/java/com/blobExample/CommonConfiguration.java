@@ -16,6 +16,8 @@ public class CommonConfiguration extends Configuration {
     @NotEmpty
     private String defaultName;
 
+    private BlobsConfiguration blobsConfiguration;
+
     @Valid
     @NotNull
     private JerseyClientConfiguration jerseyClient = new JerseyClientConfiguration();
@@ -47,5 +49,15 @@ public class CommonConfiguration extends Configuration {
     @JsonProperty("jerseyClient")
     public JerseyClientConfiguration getJerseyClientConfiguration() {
         return jerseyClient;
+    }
+
+    @JsonProperty
+    public BlobsConfiguration getBlobsConfiguration() {
+        return blobsConfiguration;
+    }
+
+    @JsonProperty
+    public void setBlobsConfiguration(BlobsConfiguration blobsConfiguration) {
+        this.blobsConfiguration = blobsConfiguration;
     }
 }

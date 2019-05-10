@@ -5,3 +5,9 @@ server:
   adminConnectors: []
 template: Hello ServerResource. I am %s!
 defaultName: Stranger ClientResource
+
+blobsConfiguration:
+  areBlobsEnabled: true
+  store:
+    name: FileStore
+    blobsRelativePath: /blobs

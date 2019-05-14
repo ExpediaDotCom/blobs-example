@@ -1,11 +1,11 @@
 package com.blobExample.client;
 
-import com.blobExample.BlobResources;
 import com.blobExample.models.ClientRequest;
 import com.blobExample.models.ClientResponse;
 import com.blobExample.models.ServerResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.blobs.core.*;
+import com.expedia.blobs.core.predicates.BlobsRateLimiter;
 
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
@@ -30,14 +30,18 @@ public class ClientResource {
     private final String defaultName;
     private final AtomicLong counter;
     private javax.ws.rs.client.Client jerseyClient;
-    private BlobResources blobResources;
+    private BlobStore blobStore;
 
-    public ClientResource(String template, String defaultName, Client jerseyClient, BlobResources blobResources) {
+    public Client getJerseyClient() {
+        return jerseyClient;
+    }
+
+    public ClientResource(String template, String defaultName, Client jerseyClient, BlobStore blobStore) {
         this.template = template;
         this.defaultName = defaultName;
         counter = new AtomicLong();
         this.jerseyClient = jerseyClient;
-        this.blobResources = blobResources;
+        this.blobStore = blobStore;
     }
 
     @GET
@@ -50,7 +54,9 @@ public class ClientResource {
 
         final ClientRequest clientRequest = new ClientRequest(clientName, message);
 
-        Blobs requestBlob = createBlob(createBlobFactory());
+        BlobContext blobContext = createBlobContext("ServerService", "getMessageFromServer");
+
+        Blobs requestBlob = createBlob(createBlobFactory(), blobContext);
 
         if (requestBlob != null) {
             Map<String, String> requestBlobMetadata = new HashMap<>();
@@ -71,7 +77,7 @@ public class ClientResource {
 
         ServerResponse serverResponse = response.readEntity(ServerResponse.class);
 
-        Blobs responseBlob = createBlob(createBlobFactory());
+        Blobs responseBlob = createBlob(createBlobFactory(), blobContext);
 
         if (responseBlob != null) {
             Map<String, String> responseBlobMetadata = new HashMap<>();
@@ -81,6 +87,10 @@ public class ClientResource {
         }
 
         return new ClientResponse(counter.incrementAndGet(), message, serverResponse);
+    }
+
+    private BlobContext createBlobContext(String serviceName, String operationName) {
+        return new SimpleBlobContext(serviceName, operationName);
     }
 
     private void writeBlob(Blobs blob, Object data, Map<String, String> blobMetadata, BlobType blobType) {
@@ -111,14 +121,24 @@ public class ClientResource {
         return metadataCallback;
     }
 
-    private Blobs createBlob(BlobsFactory<BlobContext> blobsFactory) {
-        if (blobResources != null && blobResources.getBlobContext() != null) {
-            return blobsFactory.create(blobResources.getBlobContext());
+    private Blobs createBlob(BlobsFactory<BlobContext> blobsFactory, BlobContext blobContext) {
+        if (blobStore!= null && blobsFactory != null) {
+            return blobsFactory.create(blobContext);
         }
         return null;
     }
 
     private BlobsFactory<BlobContext> createBlobFactory() {
-        return new BlobsFactory<>(blobResources.getBlobStore());
+        if(blobStore == null){
+            return null;
+        }
+
+        BlobsRateLimiter<BlobContext> blobsRateLimiter = createBlobsRateLimiter();
+
+        return new BlobsFactory<>(blobStore, blobsRateLimiter);
+    }
+
+    private BlobsRateLimiter<BlobContext> createBlobsRateLimiter() {
+        return new BlobsRateLimiter<>(2);
     }
 }

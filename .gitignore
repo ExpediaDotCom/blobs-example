@@ -12,6 +12,12 @@ buildNumber.properties
 .idea/dictionaries/vsawhney.xml
 .DS_Store
 blobs/
+BenchmarkingBlobs/
+jmh-*.json
+.classpath
+.settings/*
+.project
+.factorypath
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar

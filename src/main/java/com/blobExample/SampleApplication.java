@@ -8,6 +8,7 @@ import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
 
+import java.io.File;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
@@ -34,6 +35,10 @@ public class SampleApplication {
     }
 
     private static void initBenchmarking() {
+        File resultDirectory = new File("JMH-BenchmarkingResults");
+        if(!resultDirectory.exists()){
+            resultDirectory.mkdir();
+        }
         ResultFormatType resultsFileOutputType = ResultFormatType.JSON;
         String resultFilePrefix = "jmh-";
 
@@ -78,7 +83,7 @@ public class SampleApplication {
 
         }
 
-        return String.format("%s%s%s", resultFilePrefix, date.format(formatter), suffix);
+        return String.format("JMH-BenchmarkingResults/%s%s%s", resultFilePrefix, date.format(formatter), suffix);
     }
 
 }

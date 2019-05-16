@@ -5,15 +5,10 @@ import com.blobExample.models.ClientResponse;
 import com.blobExample.models.ServerResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.blobs.core.*;
+import com.expedia.blobs.core.BlobStore;
+import com.expedia.blobs.core.Blobs;
+import com.expedia.blobs.core.BlobsFactory;
 import com.expedia.blobs.core.predicates.BlobsRateLimiter;
-
-import javax.ws.rs.*;
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.Entity;
-import javax.ws.rs.client.Invocation;
-import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.io.OutputStream;
@@ -21,6 +16,14 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import javax.ws.rs.*;
+import javax.ws.rs.client.Client;
+import javax.ws.rs.client.Entity;
+import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.WebTarget;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
 
 @Path("/displayMessage")
 @Produces(MediaType.APPLICATION_JSON)
@@ -54,7 +57,9 @@ public class ClientResource {
 
         final ClientRequest clientRequest = new ClientRequest(clientName, message);
 
-        BlobContext blobContext = createBlobContext("ServerService", "getMessageFromServer");
+        BlobContext blobContext = null;
+        if (blobStore != null)
+             blobContext = createBlobContext("ServerService", "getMessageFromServer");
 
         Blobs requestBlob = createBlob(createBlobFactory(), blobContext);
 
@@ -122,14 +127,14 @@ public class ClientResource {
     }
 
     private Blobs createBlob(BlobsFactory<BlobContext> blobsFactory, BlobContext blobContext) {
-        if (blobStore!= null && blobsFactory != null) {
+        if (blobStore != null && blobsFactory != null && blobContext != null) {
             return blobsFactory.create(blobContext);
         }
         return null;
     }
 
     private BlobsFactory<BlobContext> createBlobFactory() {
-        if(blobStore == null){
+        if (blobStore == null) {
             return null;
         }
 
@@ -139,6 +144,6 @@ public class ClientResource {
     }
 
     private BlobsRateLimiter<BlobContext> createBlobsRateLimiter() {
-        return new BlobsRateLimiter<>(2);
+        return new BlobsRateLimiter<>(5);
     }
 }

@@ -61,11 +61,16 @@ public class ClientApplication extends Application<CommonConfiguration> {
                 if(!directory.exists()){
                     directory.mkdir();
                 }
-                return new FileStore(directory);
+                return createFileStore(directory);
             }
             case S3_STORE:
                 return null;
         }
         return null;
+    }
+
+    private FileStore createFileStore(File directory) {
+        FileStore.Builder builder = new FileStore.Builder(directory);
+        return builder.build();
     }
 }

@@ -48,7 +48,11 @@ public class BenchmarkServiceForBlobAttach {
         private FileStore setupBlobStore() {
             File directory = setupBlobsDirectory();
 
-            return new FileStore(directory, 8 , 180);
+            FileStore.Builder builder = new FileStore.Builder(directory)
+                    .withShutdownWaitInSeconds(360)
+                    .withManualShutdown();
+
+            return builder.build();
         }
 
         private File setupBlobsDirectory() {
@@ -71,7 +75,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+    @BenchmarkMode({Mode.Throughput})
     public ClientResponse blobsEnabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, state.blobStore);
@@ -82,7 +86,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput, Mode.AverageTime})
+    @BenchmarkMode({Mode.Throughput})
     public ClientResponse blobsDisabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, null);

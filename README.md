@@ -1,38 +1,42 @@
 ## blobs-example
 
-Build the app using
+>Build the app using
 
 `mvn clean package`
 
 After building the app use the following commands to:
 
-1. Run the client _(http://localhost:9091)_
+>1. Run the client _(http://localhost:9091)_
 
 `java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleClient`
 
-2. Run the server _(http://localhost:9090)_
+>2. Run the server _(http://localhost:9090)_
 
 `java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleServer`
  
- You can check if the application is working by hitting the following url:
+ >You can check if the application is working by hitting the following url:
  
  `http://localhost:9091/displayMessage?name=SampleClient`
  
- ###Record Blobs
+ ##Record Blobs
  
- To enable the recording of the blobs, set _`areBlobsEnabled`_ to true in _`config-client.yaml`_, run the client and server again and hit the above URL.
+ >To enable the recording of the blobs, set _`areBlobsEnabled`_ to true in _`config-client.yaml`_, run the client and server again and hit the above URL.
  
- You will be able to find the blobs created inside _`blobsRelativePath`_ set in the same config file.
+ >You will be able to find the blobs created inside _`blobsRelativePath`_ set in the same config file.
  
- _**Default blobsRelativePath:** ./blobs_
+ **Defaults:**
+  
+  _areBlobsEnabled: true_
  
- ###Run Benchmarks
+ _blobsRelativePath: ./blobs_
  
- Build docker image in local:
+ ##Run Benchmarks
+ 
+ >Build docker image in local:
  
  `docker build -t blobs:blobs-example .`
  
- Run docker image
+ >Run docker image
  
  `docker run --name blobsExample -v <Source>:/app/bin/blobs_home/JMH-BenchmarkingResults --cpus <Cores> -m <Memory> <IMAGE ID>`
  

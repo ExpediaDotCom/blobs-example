@@ -5,27 +5,35 @@ import com.blobExample.models.ClientRequest;
 import com.blobExample.models.ClientResponse;
 import com.blobExample.models.ServerResponse;
 import com.expedia.blobs.core.io.FileStore;
+
 import java.io.File;
+import java.io.IOException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.apache.commons.io.FileUtils;
 import org.mockito.Mockito;
 import org.openjdk.jmh.annotations.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import static org.mockito.Mockito.when;
 
 public class BenchmarkServiceForBlobAttach {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(FileStore.class);
+
     @State(Scope.Benchmark)
     public static class ClientState {
 
         @Setup(Level.Iteration)
         public void doSetup() {
-            System.out.println("doSetup Called");
+            LOGGER.info("doSetup Called");
 
             template = "Hello ServerResource. I am %s!";
             defaultName = "BlobsBenchmark";
@@ -40,9 +48,21 @@ public class BenchmarkServiceForBlobAttach {
 
         @TearDown(Level.Iteration)
         public void tearDown() {
-            System.out.println("Tear down called");
+            LOGGER.info("Tear down called");
             if (blobStore != null)
                 blobStore.close();
+
+            try {
+                removeCurrentRunBlobs();
+            } catch (IOException ex) {
+                LOGGER.error("Could not delete BenchmarkingBlobs Directory");
+            }
+        }
+
+        private void removeCurrentRunBlobs() throws IOException {
+            String userDirectory = System.getProperty("user.dir");
+            File file = new File(new String(userDirectory).concat("/BenchmarkingBlobs"));
+            FileUtils.deleteDirectory(file);
         }
 
         private FileStore setupBlobStore() {
@@ -75,7 +95,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput})
+    @BenchmarkMode({Mode.AverageTime, Mode.Throughput, Mode.SampleTime})
     public ClientResponse blobsEnabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, state.blobStore);
@@ -86,7 +106,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.Throughput})
+    @BenchmarkMode({Mode.AverageTime, Mode.Throughput, Mode.SampleTime})
     public ClientResponse blobsDisabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, null);

@@ -7,6 +7,7 @@ import org.openjdk.jmh.runner.Runner;
 import org.openjdk.jmh.runner.RunnerException;
 import org.openjdk.jmh.runner.options.Options;
 import org.openjdk.jmh.runner.options.OptionsBuilder;
+import org.openjdk.jmh.runner.options.TimeValue;
 
 import java.io.File;
 import java.time.LocalDateTime;
@@ -45,13 +46,14 @@ public class SampleApplication {
         Options opt = new OptionsBuilder()
                 .include(".*Benchmark")
                 .warmupIterations(5)
-                .measurementIterations(5)
+                .measurementIterations(10)
                 .timeUnit(TimeUnit.MILLISECONDS)
+                .timeout(TimeValue.minutes(5))
                 .forks(1)
                 .threads(1)
                 .resultFormat(resultsFileOutputType)
                 .result(buildResultsFileName(resultFilePrefix, resultsFileOutputType))
-                .jvmArgs("-server", "-Xms2048m", "-Xmx2048m")
+                .jvmArgs("-server", "-Xms4096m", "-Xmx4096m")
                 .build();
         try {
             new Runner(opt).run();

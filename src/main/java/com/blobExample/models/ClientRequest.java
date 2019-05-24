@@ -2,7 +2,9 @@ package com.blobExample.models;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ClientRequest {
+import java.io.Serializable;
+
+public class ClientRequest implements Serializable {
     private String name;
     private String message;
 

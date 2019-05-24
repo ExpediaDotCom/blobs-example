@@ -3,7 +3,9 @@ package com.blobExample.models;
 import com.blobExample.models.ServerResponse;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-public class ClientResponse {
+import java.io.Serializable;
+
+public class ClientResponse implements Serializable {
     private long hit;
     private String clientMessage;
     private ServerResponse serverResponse;

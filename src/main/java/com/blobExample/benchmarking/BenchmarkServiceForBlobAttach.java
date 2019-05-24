@@ -26,7 +26,7 @@ import static org.mockito.Mockito.when;
 
 public class BenchmarkServiceForBlobAttach {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(FileStore.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(BenchmarkServiceForBlobAttach.class);
 
     @State(Scope.Benchmark)
     public static class ClientState {

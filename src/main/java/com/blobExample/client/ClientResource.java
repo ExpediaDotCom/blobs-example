@@ -9,13 +9,14 @@ import com.expedia.blobs.core.BlobStore;
 import com.expedia.blobs.core.Blobs;
 import com.expedia.blobs.core.BlobsFactory;
 import com.expedia.blobs.core.predicates.BlobsRateLimiter;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 import javax.ws.rs.*;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
@@ -34,10 +35,7 @@ public class ClientResource {
     private final AtomicLong counter;
     private javax.ws.rs.client.Client jerseyClient;
     private BlobStore blobStore;
-
-    public Client getJerseyClient() {
-        return jerseyClient;
-    }
+    private static final Logger LOGGER = LoggerFactory.getLogger(ClientResource.class);
 
     public ClientResource(String template, String defaultName, Client jerseyClient, BlobStore blobStore) {
         this.template = template;
@@ -47,6 +45,10 @@ public class ClientResource {
         this.blobStore = blobStore;
     }
 
+    public Client getJerseyClient() {
+        return jerseyClient;
+    }
+
     @GET
     @Timed
     @Consumes(MediaType.APPLICATION_JSON)
@@ -54,76 +56,59 @@ public class ClientResource {
 
         final String clientName = name != null ? name : defaultName;
         final String message = String.format(template, clientName);
-
         final ClientRequest clientRequest = new ClientRequest(clientName, message);
 
         BlobContext blobContext = null;
-        if (blobStore != null)
-             blobContext = createBlobContext("ServerService", "getMessageFromServer");
+        if (blobStore != null) {
+            blobContext = new SimpleBlobContext("ServerService", "getMessageFromServer");
 
-        Blobs requestBlob = createBlob(createBlobFactory(), blobContext);
+            Blobs requestBlob = createBlob(createBlobFactory(), blobContext);
 
-        if (requestBlob != null) {
-            Map<String, String> requestBlobMetadata = new HashMap<>();
-            requestBlobMetadata.put("name", name);
+            if (requestBlob != null) {
+                Map<String, String> requestBlobMetadata = new HashMap<>();
+                requestBlobMetadata.put("name", name);
 
-            writeBlob(requestBlob, clientRequest, requestBlobMetadata, BlobType.REQUEST);
+                writeBlob(requestBlob, clientRequest, requestBlobMetadata, BlobType.REQUEST);
+            }
         }
 
         WebTarget webTarget = jerseyClient.target("http://localhost:9090/hi");
         Invocation.Builder invocationBuilder = webTarget.request(MediaType.APPLICATION_JSON_TYPE);
-
         Response response = invocationBuilder.post(
                 Entity.entity(
                         clientRequest,
                         MediaType.APPLICATION_JSON_TYPE
                 )
         );
-
         ServerResponse serverResponse = response.readEntity(ServerResponse.class);
 
-        Blobs responseBlob = createBlob(createBlobFactory(), blobContext);
+        if (blobStore != null && blobContext != null) {
+            Blobs responseBlob = createBlob(createBlobFactory(), blobContext);
 
-        if (responseBlob != null) {
-            Map<String, String> responseBlobMetadata = new HashMap<>();
-            responseBlobMetadata.put("name", serverResponse.getServerName());
+            if (responseBlob != null) {
+                Map<String, String> responseBlobMetadata = new HashMap<>();
+                responseBlobMetadata.put("name", serverResponse.getServerName());
 
-            writeBlob(responseBlob, serverResponse, responseBlobMetadata, BlobType.RESPONSE);
+                writeBlob(responseBlob, serverResponse, responseBlobMetadata, BlobType.RESPONSE);
+            }
         }
 
         return new ClientResponse(counter.incrementAndGet(), message, serverResponse);
     }
 
-    private BlobContext createBlobContext(String serviceName, String operationName) {
-        return new SimpleBlobContext(serviceName, operationName);
-    }
-
     private void writeBlob(Blobs blob, Object data, Map<String, String> blobMetadata, BlobType blobType) {
         blob.write(blobType,
                 ContentType.JSON,
-                createDataCallback(data),
-                createMetadataCallback(blobMetadata)
+                (outputStream) -> {
+                    try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
+                        objectOutputStream.writeObject(data);
+                        objectOutputStream.flush();
+                    } catch (IOException ex) {
+                        LOGGER.error("Exception occured while writing data to stream for preparing blob", ex);
+                    }
+                },
+                m -> blobMetadata.forEach((key, value) -> m.add(key, value))
         );
-    }
-
-    private Consumer<OutputStream> createDataCallback(Object data) {
-        Consumer<OutputStream> dataCallback = (outputStream) -> {
-            try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
-                objectOutputStream.writeObject(data);
-            } catch (IOException ex) {
-                //TODO: handle the IO exception
-            }
-        };
-
-        return dataCallback;
-    }
-
-    private Consumer<Metadata> createMetadataCallback(Map<String, String> metadata) {
-        Consumer<Metadata> metadataCallback = m -> {
-            metadata.forEach((key, value) -> m.add(key, value));
-        };
-
-        return metadataCallback;
     }
 
     private Blobs createBlob(BlobsFactory<BlobContext> blobsFactory, BlobContext blobContext) {
@@ -134,10 +119,6 @@ public class ClientResource {
     }
 
     private BlobsFactory<BlobContext> createBlobFactory() {
-        if (blobStore == null) {
-            return null;
-        }
-
         BlobsRateLimiter<BlobContext> blobsRateLimiter = createBlobsRateLimiter();
 
         return new BlobsFactory<>(blobStore, blobsRateLimiter);

@@ -9,11 +9,12 @@ import com.expedia.blobs.core.BlobStore;
 import com.expedia.blobs.core.Blobs;
 import com.expedia.blobs.core.BlobsFactory;
 import com.expedia.blobs.core.predicates.BlobsRateLimiter;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
@@ -59,10 +60,12 @@ public class ClientResource {
         final ClientRequest clientRequest = new ClientRequest(clientName, message);
 
         BlobContext blobContext = null;
+        BlobsFactory<BlobContext> blobsFactory = null;
         if (blobStore != null) {
             blobContext = new SimpleBlobContext("ServerService", "getMessageFromServer");
+            blobsFactory = createBlobFactory();
 
-            Blobs requestBlob = createBlob(createBlobFactory(), blobContext);
+            Blobs requestBlob = createBlob(blobsFactory, blobContext);
 
             if (requestBlob != null) {
                 Map<String, String> requestBlobMetadata = new HashMap<>();
@@ -82,8 +85,8 @@ public class ClientResource {
         );
         ServerResponse serverResponse = response.readEntity(ServerResponse.class);
 
-        if (blobStore != null && blobContext != null) {
-            Blobs responseBlob = createBlob(createBlobFactory(), blobContext);
+        if (blobStore != null && blobContext != null && blobsFactory != null) {
+            Blobs responseBlob = createBlob(blobsFactory, blobContext);
 
             if (responseBlob != null) {
                 Map<String, String> responseBlobMetadata = new HashMap<>();
@@ -100,11 +103,13 @@ public class ClientResource {
         blob.write(blobType,
                 ContentType.JSON,
                 (outputStream) -> {
-                    try (ObjectOutputStream objectOutputStream = new ObjectOutputStream(outputStream)) {
-                        objectOutputStream.writeObject(data);
-                        objectOutputStream.flush();
-                    } catch (IOException ex) {
-                        LOGGER.error("Exception occured while writing data to stream for preparing blob", ex);
+                    ObjectMapper objectMapper = new ObjectMapper();
+                    try {
+                        outputStream.write(objectMapper.writeValueAsBytes(data));
+                    } catch (JsonProcessingException e) {
+                        LOGGER.error("Exception occured while converting object to bytes", e);
+                    } catch (IOException e) {
+                        LOGGER.error("Exception occured while writing data to stream for preparing blob", e);
                     }
                 },
                 m -> blobMetadata.forEach((key, value) -> m.add(key, value))

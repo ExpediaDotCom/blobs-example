@@ -4,7 +4,6 @@ import com.blobExample.client.ClientResource;
 import com.blobExample.models.ClientRequest;
 import com.blobExample.models.ClientResponse;
 import com.blobExample.models.ServerResponse;
-import com.expedia.blobs.core.io.FileStore;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +14,7 @@ import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import com.expedia.blobs.stores.io.FileStore;
 import org.apache.commons.io.FileUtils;
 import org.mockito.Mockito;
 import org.openjdk.jmh.annotations.*;
@@ -70,7 +70,7 @@ public class BenchmarkServiceForBlobAttach {
 
             FileStore.Builder builder = new FileStore.Builder(directory)
                     .withShutdownWaitInSeconds(360)
-                    .withManualShutdown();
+                    .disableAutoShutdown();
 
             return builder.build();
         }
@@ -95,7 +95,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.AverageTime, Mode.Throughput, Mode.SampleTime})
+    @BenchmarkMode({Mode.SampleTime, Mode.AverageTime, Mode.Throughput})
     public ClientResponse blobsEnabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, state.blobStore);
@@ -106,7 +106,7 @@ public class BenchmarkServiceForBlobAttach {
     }
 
     @Benchmark
-    @BenchmarkMode({Mode.AverageTime, Mode.Throughput, Mode.SampleTime})
+    @BenchmarkMode({Mode.SampleTime, Mode.AverageTime, Mode.Throughput})
     public ClientResponse blobsDisabled(ClientState state) {
 
         ClientResource clientResource = new ClientResource(state.template, state.defaultName, state.client, null);

@@ -45,8 +45,8 @@ public class SampleApplication {
 
         Options opt = new OptionsBuilder()
                 .include(".*Benchmark")
-                .warmupIterations(5)
-                .measurementIterations(10)
+                .warmupIterations(10)
+                .measurementIterations(15)
                 .timeUnit(TimeUnit.MILLISECONDS)
                 .timeout(TimeValue.minutes(5))
                 .forks(1)

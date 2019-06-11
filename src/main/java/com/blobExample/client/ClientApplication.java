@@ -3,7 +3,7 @@ package com.blobExample.client;
 import com.blobExample.BlobsConfiguration;
 import com.blobExample.CommonConfiguration;
 import com.expedia.blobs.core.BlobStore;
-import com.expedia.blobs.core.io.FileStore;
+import com.expedia.blobs.stores.io.FileStore;
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
 import io.dropwizard.setup.Bootstrap;

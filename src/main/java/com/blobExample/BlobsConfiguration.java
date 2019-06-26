@@ -35,7 +35,7 @@ public class BlobsConfiguration {
     }
 
 
-    public class Store{
+    public class Store {
 
         private String name;
 

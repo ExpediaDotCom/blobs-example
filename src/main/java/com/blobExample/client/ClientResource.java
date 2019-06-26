@@ -6,7 +6,6 @@ import com.blobExample.models.ServerResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.blobs.core.*;
 import com.expedia.blobs.core.BlobStore;
-import com.expedia.blobs.core.Blobs;
 import com.expedia.blobs.core.BlobsFactory;
 import com.expedia.blobs.core.predicates.BlobsRateLimiter;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -65,13 +64,13 @@ public class ClientResource {
             blobContext = new SimpleBlobContext("ServerService", "getMessageFromServer");
             blobsFactory = createBlobFactory();
 
-            Blobs requestBlob = createBlob(blobsFactory, blobContext);
+            BlobWriter requestBlobWriter = getBlobWriter(blobsFactory, blobContext);
 
-            if (requestBlob != null) {
+            if (requestBlobWriter != null) {
                 Map<String, String> requestBlobMetadata = new HashMap<>();
                 requestBlobMetadata.put("name", name);
 
-                writeBlob(requestBlob, clientRequest, requestBlobMetadata, BlobType.REQUEST);
+                writeBlob(requestBlobWriter, clientRequest, requestBlobMetadata, BlobType.REQUEST);
             }
         }
 
@@ -86,21 +85,21 @@ public class ClientResource {
         ServerResponse serverResponse = response.readEntity(ServerResponse.class);
 
         if (blobStore != null && blobContext != null && blobsFactory != null) {
-            Blobs responseBlob = createBlob(blobsFactory, blobContext);
+            BlobWriter responseBlobWriter = getBlobWriter(blobsFactory, blobContext);
 
-            if (responseBlob != null) {
+            if (responseBlobWriter != null) {
                 Map<String, String> responseBlobMetadata = new HashMap<>();
                 responseBlobMetadata.put("name", serverResponse.getServerName());
 
-                writeBlob(responseBlob, serverResponse, responseBlobMetadata, BlobType.RESPONSE);
+                writeBlob(responseBlobWriter, serverResponse, responseBlobMetadata, BlobType.RESPONSE);
             }
         }
 
         return new ClientResponse(counter.incrementAndGet(), message, serverResponse);
     }
 
-    private void writeBlob(Blobs blob, Object data, Map<String, String> blobMetadata, BlobType blobType) {
-        blob.write(blobType,
+    private void writeBlob(BlobWriter blobWriter, Object data, Map<String, String> blobMetadata, BlobType blobType) {
+        blobWriter.write(blobType,
                 ContentType.JSON,
                 (outputStream) -> {
                     ObjectMapper objectMapper = new ObjectMapper();
@@ -116,7 +115,7 @@ public class ClientResource {
         );
     }
 
-    private Blobs createBlob(BlobsFactory<BlobContext> blobsFactory, BlobContext blobContext) {
+    private BlobWriter getBlobWriter(BlobsFactory<BlobContext> blobsFactory, BlobContext blobContext) {
         if (blobStore != null && blobsFactory != null && blobContext != null) {
             return blobsFactory.create(blobContext);
         }

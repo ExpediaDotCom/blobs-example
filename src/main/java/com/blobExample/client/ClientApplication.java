@@ -48,7 +48,7 @@ public class ClientApplication extends Application<CommonConfiguration> {
     }
 
     private BlobStore initializeBlobStore(BlobsConfiguration blobsConfiguration) {
-        if(!blobsConfiguration.getAreBlobsEnabled()){
+        if (!blobsConfiguration.getAreBlobsEnabled()) {
             return null;
         }
 
@@ -58,7 +58,7 @@ public class ClientApplication extends Application<CommonConfiguration> {
                 String userDirectory = System.getProperty("user.dir");
                 String directoryPath = new String(userDirectory).concat(store.getBlobsRelativePath());
                 File directory = new File(directoryPath);
-                if(!directory.exists()){
+                if (!directory.exists()) {
                     directory.mkdir();
                 }
                 return createFileStore(directory);

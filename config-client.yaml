@@ -3,8 +3,6 @@ server:
     - type: http
       port: 9091
   adminConnectors: []
-template: Hello ServerResource. I am %s!
-defaultName: Stranger ClientResource
 
 blobsConfiguration:
   areBlobsEnabled: true

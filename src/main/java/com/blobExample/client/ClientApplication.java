@@ -2,7 +2,10 @@ package com.blobExample.client;
 
 import com.blobExample.BlobsConfiguration;
 import com.blobExample.CommonConfiguration;
+import com.expedia.blobs.core.BlobContext;
 import com.expedia.blobs.core.BlobStore;
+import com.expedia.blobs.core.BlobsFactory;
+import com.expedia.blobs.core.predicates.BlobsRateLimiter;
 import com.expedia.blobs.stores.io.FileStore;
 import io.dropwizard.Application;
 import io.dropwizard.client.JerseyClientBuilder;
@@ -38,11 +41,11 @@ public class ClientApplication extends Application<CommonConfiguration> {
         final javax.ws.rs.client.Client client = new JerseyClientBuilder(environment).using(commonConfiguration.getJerseyClientConfiguration())
                 .build(getName() + "ClientRequest");
 
+        final BlobsConfiguration blobsConfiguration = commonConfiguration.getBlobsConfiguration();
         final ClientResource clientResource = new ClientResource(
-                commonConfiguration.getTemplate(),
-                commonConfiguration.getDefaultName(),
                 client,
-                initializeBlobStore(commonConfiguration.getBlobsConfiguration())
+                blobsConfiguration.getAreBlobsEnabled() ? createBlobFactory(initializeBlobStore(blobsConfiguration)) : null,
+                environment.getObjectMapper()
         );
         environment.jersey().register(clientResource);
     }
@@ -72,5 +75,15 @@ public class ClientApplication extends Application<CommonConfiguration> {
     private FileStore createFileStore(File directory) {
         FileStore.Builder builder = new FileStore.Builder(directory);
         return builder.build();
+    }
+
+    private BlobsFactory<BlobContext> createBlobFactory(final BlobStore blobStore) {
+        BlobsRateLimiter<BlobContext> blobsRateLimiter = createBlobsRateLimiter();
+
+        return new BlobsFactory<>(blobStore, blobsRateLimiter);
+    }
+
+    private BlobsRateLimiter<BlobContext> createBlobsRateLimiter() {
+        return new BlobsRateLimiter<>(5);
     }
 }

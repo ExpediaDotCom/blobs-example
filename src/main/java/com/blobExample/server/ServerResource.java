@@ -10,19 +10,12 @@ import javax.ws.rs.core.MediaType;
 @Path("/hi")
 @Produces(MediaType.APPLICATION_JSON)
 public class ServerResource {
-    private final String template;
-    private final String defaultName;
-
-    public ServerResource(String template, String defaultName) {
-        this.template = template;
-        this.defaultName = defaultName;
-    }
 
     @POST
     @Consumes("application/json")
-    public ServerResponse receiveHi(ClientRequest request){
-        final String message = String.format(template, request.getName(), defaultName);
-        return new ServerResponse(defaultName, message);
+    public ServerResponse receiveHi(ClientRequest request) {
+        final String message = String.format("Hi %s! I am %s!", request.getName(), "ServerResource");
+        return new ServerResponse("ServerResource", message);
     }
 
 }

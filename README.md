@@ -1,6 +1,12 @@
-##### This application demonstrates the use of [Blobs](https://github.com/mchandramouli/blobs) that can be used to store and read a blob created by it to and from a storage area respectively.
+## Blobs Example
 
-***
+This application demonstrates the use of [Blobs](https://github.com/mchandramouli/blobs) that can be used to store and read a blob created by it to and from a storage area respectively.
+
+In this example, the client sends a request to the server which then sends the response back to it. Both the request and response are saved as a blob at the client side to a local file storage at a path given in the configuration.
+
+The client runs on port [9091](http://localhost:9091) and the server on [9090](http://localhost:9090).
+
+## Run the example
 
 * Build the application using
 
@@ -16,9 +22,9 @@
 
     ```java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleServer```
  
-  * Check if the application is working by hitting the following url:
+  * Send a request:
  
-    ```http://localhost:9091/displayMessage```
+    ```curl http://localhost:9091/displayMessage```
  
  ## Record Blobs
  

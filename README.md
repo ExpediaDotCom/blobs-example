@@ -25,6 +25,17 @@ The client runs on port [9091](http://localhost:9091) and the server on [9090](h
   * Send a request:
  
     ```curl http://localhost:9091/displayMessage```
+    
+    You will know that the app is working fine if you get the correct json response like:
+    ```
+    {
+    "clientMessage": "Hello ServerResource. I am ClientResource!",
+    "serverResponse": {
+    "serverName": "ServerResource",
+    "message": "Hi ClientResource! I am ServerResource!"
+        }
+    }
+    ```
  
  ## Record Blobs
  

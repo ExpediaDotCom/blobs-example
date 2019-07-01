@@ -1,22 +1,24 @@
-## blobs-example
+##### This application demonstrates the use of [Blobs](https://github.com/mchandramouli/blobs) that can be used to store and read a blob created by it to and from a storage area respectively.
 
-Build the app using
+***
 
-```mvn clean package```
+* Build the application using
 
->After building the app use the following commands to:
+  ```mvn clean package```
 
-Run the client _(http://localhost:9091)_
+* Post build use the following commands to:
 
-```java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleClient```
+  * Run the client on [localhost:9091](http://localhost:9091)
 
-Run the server _(http://localhost:9090)_
+    ```java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleClient```
 
-```java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleServer```
+  * Run the server on [localhost:9090](http://localhost:9090)
+
+    ```java -jar target/blobExample-service-1.0-SNAPSHOT.jar sampleServer```
  
-You can check if the application is working by hitting the following url:
+  * Check if the application is working by hitting the following url:
  
- ```http://localhost:9091/displayMessage?name=SampleClient```
+    ```http://localhost:9091/displayMessage```
  
  ## Record Blobs
  
@@ -31,6 +33,8 @@ You can check if the application is working by hitting the following url:
  _blobsRelativePath: ./blobs_
  
  ## Run Benchmarks
+ 
+ The tool used to benchmark the library is [JMH](https://openjdk.java.net/projects/code-tools/jmh/).
  
  Build docker image in local:
  
@@ -50,3 +54,31 @@ You can check if the application is working by hitting the following url:
  
  Memory=Container RAM. Example: 8192m.
 ```
+
+Look for the `json` file created in the `Source` which will contain the results for the benchmark run.
+
+Use [JMH-Visualizer(Online Version)](https://jmh.morethan.io/) to present the benchmark results.
+
+## Benchmarking Results
+
+The benchmarking was done for 3 different parameters with the blobs library added to the application to store the blobs in local storage and without storing any blob.
+
+### Average Time
+
+![AverageTime](Benchmarking Results/AverageTime Result.png)
+
+### Throughput
+
+![Throughput](Benchmarking Results/Throughput Result.png)
+
+### Sample Time
+
+![SampleTime](Benchmarking Results/SampleTime Result.png)
+
+The benchmarking was performed with following parameters:
+
+* CPU: 4
+* RAM: 8GB
+* Warm-ups: 10
+* Iterations: 15
+* Environment: MacOS

@@ -65,15 +65,15 @@ The benchmarking was done for 3 different parameters with the blobs library adde
 
 ### Average Time
 
-![AverageTime](Benchmarking Results/AverageTime Result.png)
+![AverageTime](BenchmarkingResults/AverageTime.png)
 
 ### Throughput
 
-![Throughput](Benchmarking Results/Throughput Result.png)
+![Throughput](BenchmarkingResults/Throughput.png)
 
 ### Sample Time
 
-![SampleTime](Benchmarking Results/SampleTime Result.png)
+![SampleTime](BenchmarkingResults/SampleTime.png)
 
 The benchmarking was performed with following parameters:
 

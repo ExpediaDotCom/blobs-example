@@ -5,21 +5,23 @@ import com.blobExample.models.ClientResponse;
 import com.blobExample.models.ServerResponse;
 import com.codahale.metrics.annotation.Timed;
 import com.expedia.blobs.core.*;
-import com.expedia.blobs.core.BlobsFactory;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.util.Collections;
-import java.util.Map;
-import javax.ws.rs.*;
+import javax.ws.rs.Consumes;
+import javax.ws.rs.GET;
+import javax.ws.rs.Path;
+import javax.ws.rs.Produces;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.Map;
 
 
 @Path("/displayMessage")

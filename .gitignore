@@ -7,6 +7,18 @@ release.properties
 dependency-reduced-pom.xml
 buildNumber.properties
 .mvn/timing.properties
+.idea/
+*.iml
+.idea/dictionaries/vsawhney.xml
+.DS_Store
+blobs/
+BenchmarkingBlobs/
+jmh-*.json
+.classpath
+.settings/*
+.project
+.factorypath
+JMH-Results/*
 
 # Avoid ignoring Maven wrapper jar file (.jar files are usually ignored)
 !/.mvn/wrapper/maven-wrapper.jar

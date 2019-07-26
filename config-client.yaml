@@ -1,0 +1,11 @@
+server:
+  applicationConnectors:
+    - type: http
+      port: 9091
+  adminConnectors: []
+
+blobsConfiguration:
+  areBlobsEnabled: true
+  store:
+    name: FileStore
+    blobsRelativePath: /blobs

@@ -4,8 +4,8 @@ server:
       port: 9091
   adminConnectors: []
 
-blobsConfiguration:
-  areBlobsEnabled: true
+blobs:
+  enabled: true
   store:
     name: FileStore
     blobsRelativePath: /blobs

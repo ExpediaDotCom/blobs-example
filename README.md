@@ -39,7 +39,7 @@ The client runs on port [9091](http://localhost:9091) and the server on [9090](h
  
  ## Record Blobs
  
- To enable the recording of the blobs, set _`areBlobsEnabled`_ to true in _`config-client.yaml`_, run the client and server again and hit the above URL.
+ To enable the recording of the blobs, set _`enabled`_ to true in _`config-client.yaml`_, run the client and server again and hit the above URL.
  
  You will be able to find the blobs created inside _`blobsRelativePath`_ set in the same config file.
  
